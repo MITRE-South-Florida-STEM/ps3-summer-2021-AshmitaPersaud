@@ -91,8 +91,17 @@ def get_word_score(word, n):
     n: int >= 0
     returns: int >= 0
     """
+    total=0
+    for letter in word.lower():
+      total += SCRABBLE_LETTER_VALUES[letter]
+    if 7 * len(word) - 3 * (n-len(word)) > 1:
+      total *= 7* len(word) - 3*(n-len(word))
+    else:
+      total*=1
+    return total
     
-    pass  # TO DO... Remove this line when you implement this function
+
+# TO DO... Remove this line when you implement this function
 
 #
 # Make sure you understand how this function works and what it does!
@@ -167,8 +176,21 @@ def update_hand(hand, word):
     hand: dictionary (string -> int)    
     returns: dictionary (string -> int)
     """
+    new_hand = hand.copy()
+    word = word.lower()
+    
+    for letter in word:
+        if new_hand.get(letter,0) > 0:
+            new_hand[letter] -= 1
+        
+        if new_hand.get(letter, -1) == 0:
+            del(new_hand[letter])
+            
+    return new_hand
 
-    pass  # TO DO... Remove this line when you implement this function
+
+      
+  # TO DO... Remove this line when you implement this function
 
 #
 # Problem #3: Test word validity
@@ -184,8 +206,24 @@ def is_valid_word(word, hand, word_list):
     word_list: list of lowercase strings
     returns: boolean
     """
+    lowword=word.lower()
+    words=[]
+    listword= list(lowword)
+    if '*'in listword:
+      p=listword.index('*')
+      for letter in VOWELS:
+        listword[p]=letter
+        words.append(''.join(listword))
+    else:
+      words.append(word)
+    f= False
+    for w in words:
+      if w in word_list:
+        f= True
+    if not f:
+      return False
 
-    pass  # TO DO... Remove this line when you implement this function
+  # TO DO... Remove this line when you implement this function
 
 #
 # Problem #5: Playing a hand
@@ -197,8 +235,11 @@ def calculate_handlen(hand):
     hand: dictionary (string-> int)
     returns: integer
     """
-    
-    pass  # TO DO... Remove this line when you implement this function
+    letters = 0
+    for key, value in hand.items():
+      letters+=value
+    return letters
+    # TO DO... Remove this line when you implement this function
 
 def play_hand(hand, word_list):
 
@@ -230,8 +271,25 @@ def play_hand(hand, word_list):
       returns: the total score for the hand
       
     """
-    
-    # BEGIN PSEUDOCODE <-- Remove this comment when you implement this function
+    total_score=0
+    while calculate_handlen(hand) >0:
+      print ('Current Hand: ', (display_hand(hand)))
+      word = str(input('Enter word, or "!!" to indicate that you are finshed: '))
+      if word == '!!':
+        print ('Goodbye! Total score: ',get_word_score,' points.')
+        break
+      if is_valid_word(word,hand,word_list):
+        word_score = get_word_score(word,calculate_handlen(hand))
+        total_score+=word_score
+        print('"',word,'"earned',word_score,' points.Total: ',total_score,'points')
+      else:
+        print ('Invalid word, please try again.')
+        hand= update_hand(hand,word)
+    if calculate_handlen(hand)==0:
+     print ('Run out of letters. Total score: ',total_score,'points.')
+    return total_score
+
+    #BEGIN PSEUDOCODE <-- Remove this comment when you implement this function
     # Keep track of the total score
     
     # As long as there are still letters left in the hand:
@@ -296,8 +354,23 @@ def substitute_hand(hand, letter):
     letter: string
     returns: dictionary (string -> int)
     """
+    if letter not in hand:
+      return hand
+    newfound =False
+    while not newfound:
+      newletter = random.choice(VOWELS+CONSONANTS)
+      if newletter not in hand:
+        newfound=True
+        new_hand=dict()
+        for key, value in hand.items():
+          if key==letter:
+            new_hand[newletter]= value
+          else:
+            new_hand[key]=value
+    return new_hand
+
     
-    pass  # TO DO... Remove this line when you implement this function
+    # TO DO... Remove this line when you implement this function
        
     
 def play_game(word_list):
